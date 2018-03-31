@@ -1,16 +1,17 @@
 class TrickyCalculator 
-  @@mapping_mixed_keys = {}
+  @@mapping_correct_keys = {}
 
   def self.find_missing(exp)
     expression, result = exp.split("=")
+    expression.strip!
     result.strip!
     
-    expression_array = expression.strip.split("")
+    expression_array = expression.split("")
 
     expression_array.each_with_index do |exp_num, index|
       expression_array2 = expression_array.dup
       [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, "+", "-", "/", "*"].each do |replace_num|
-        expression_array2[index] = replace_num
+        invalid_epx = ""
 
         if index == 0 || index == expression_array2.length - 1
           ["/", "*"].include?(replace_num) ? next : ""
@@ -20,33 +21,28 @@ class TrickyCalculator
           [ "+", "-","/", "*"].include?(replace_num) ? next : " "
         end
 
+        expression_array2[index] = replace_num
         test_result = expression_array2.join("")
 
-        if test_result.include?("+/") || test_result.include?("+-") || test_result.include?("+*") || 
-          test_result.include?("-/") || test_result.include?("-+") || test_result.include?("-*") || 
-          test_result.include?("*/") || test_result.include?("*-") || test_result.include?("*+") || 
-          test_result.include?("/+") || test_result.include?("/-") || test_result.include?("/*")
-
-          next
+        ["+/", "+-", "+*", "-/", "-+", "-*", "*/", "/*"].each do |error_pair|
+          test_result.include?(error_pair) ? invalid_epx = true : ""
         end
         
-        test_result = eval(test_result) rescue 0
+        if invalid_epx != true 
+          test_result = eval(test_result) 
 
-        if (test_result == result.to_i)
-          puts "#{expression_array2.join("")} "
-          puts "#{eval(expression_array2.join(""))} "
-          @@mapping_mixed_keys[exp_num] = replace_num
-          puts @@mapping_mixed_keys.inspect
-          puts "**"
-
-          next
+          if (test_result == result.to_i)
+            @@mapping_correct_keys[exp_num] = replace_num
+            next
+          end
         end
       end
     end
   end
 
-
-
+  def self.mapping_correct_keys
+    @@mapping_correct_keys.select { |key, value| key.to_s != value.to_s }
+  end
 end
 
 
@@ -56,23 +52,7 @@ TrickyCalculator.find_missing("4+4    = 8")
 TrickyCalculator.find_missing("4*7-10 = 417")
 TrickyCalculator.find_missing("9/3    = 3")
 TrickyCalculator.find_missing("42-9   = -36")
-puts "&&&&"
-puts TrickyCalculator.mapping_mixed_keys.inspect
 
-# ***********
-# Instructions
-# Please write two software programs, one in your strongest language and the other in a new language that you have little experience of that solve the following problem.
-# Please include instructions on how your solutions should be run, versions of frameworks and copies of the input/output files.
+puts "These 2 keys have been switched around #{TrickyCalculator.mapping_correct_keys}"
 
-
-# The problem
-# 2 keys on a calculator (1, 2, 3, 4, 5, 6, 7, 8, 9, 0, +, -, /, *) have been switched resulting in the following incorrect arithmetic expressions. The outputs (on the right of the ‘=’) are correct but the inputs (on the left of the ‘=’) are incorrect.
-# We need to identify which 2 have been switched.
-
-# 123    = 3
-# 8423   = 252
-# 4+4    = 8
-# 4*7-10 = 417
-# 9/3    = 3
-# 42-9   = -36
 
