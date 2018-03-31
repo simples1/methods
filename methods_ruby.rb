@@ -3,10 +3,7 @@ class TrickyCalculator
 
   def self.find_missing(exp)
     expression, result = exp.split("=")
-    expression.strip!
-    result.strip!
-    
-    expression_array = expression.split("")
+    expression_array = expression.strip.split("")
 
     expression_array.each_with_index do |exp_num, index|
       expression_array2 = expression_array.dup
@@ -29,9 +26,9 @@ class TrickyCalculator
         end
         
         if invalid_epx != true 
-          test_result = eval(test_result) 
+          test_result = eval(test_result) rescue 0
 
-          if (test_result == result.to_i)
+          if (test_result == result.strip.to_i)
             @@mapping_correct_keys[exp_num] = replace_num
             next
           end
